@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Cat, Heart, Info, Paw, Fish, Moon } from "lucide-react";
+import { Cat, Heart, Info, Paw, Fish, Moon, Star } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 const catFacts = [
   "Cats sleep for about 70% of their lives.",
@@ -30,6 +32,8 @@ const Index = () => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [showFact, setShowFact] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [likedFacts, setLikedFacts] = useState([]);
+  const { toast } = useToast();
 
   const nextFact = () => {
     setShowFact(false);
@@ -38,6 +42,21 @@ const Index = () => {
       setShowFact(true);
       setProgress(0);
     }, 300);
+  };
+
+  const toggleLikeFact = (index) => {
+    setLikedFacts((prev) => {
+      const newLikedFacts = prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index];
+      
+      toast({
+        title: prev.includes(index) ? "Fact unliked" : "Fact liked",
+        description: catFacts[index].slice(0, 50) + "...",
+      });
+
+      return newLikedFacts;
+    });
   };
 
   useEffect(() => {
@@ -54,167 +73,225 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-b from-purple-100 to-pink-100">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100">
+      <div className="max-w-5xl mx-auto">
         <motion.div 
-          className="text-center mb-8"
+          className="text-center mb-12"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-6xl font-bold text-purple-800 inline-flex items-center">
+          <h1 className="text-7xl font-bold text-purple-800 inline-flex items-center">
             Feline Fascination 
             <motion.span
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              <Cat className="ml-2 h-12 w-12" />
+              <Cat className="ml-4 h-16 w-16 text-pink-500" />
             </motion.span>
           </h1>
-          <p className="text-xl mt-2 text-purple-600">Explore the Wonderful World of Cats</p>
+          <p className="text-2xl mt-4 text-purple-600 font-light">Embark on a Whimsical Journey Through the World of Cats</p>
         </motion.div>
         
-        <Carousel className="mb-8">
-          <CarouselContent>
-            {catImages.map((src, index) => (
-              <CarouselItem key={index}>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <img 
-                    src={src}
-                    alt={`Cat ${index + 1}`}
-                    className="mx-auto object-cover w-full h-[400px] rounded-lg shadow-lg"
-                  />
-                </motion.div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Carousel className="mb-12">
+            <CarouselContent>
+              {catImages.map((src, index) => (
+                <CarouselItem key={index}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <img 
+                      src={src}
+                      alt={`Cat ${index + 1}`}
+                      className="mx-auto object-cover w-full h-[500px] rounded-xl shadow-2xl"
+                    />
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </motion.div>
 
-        <Tabs defaultValue="characteristics" className="mb-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="characteristics">Characteristics</TabsTrigger>
-            <TabsTrigger value="breeds">Popular Breeds</TabsTrigger>
-            <TabsTrigger value="behavior">Behavior</TabsTrigger>
-          </TabsList>
-          <TabsContent value="characteristics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Characteristics of Cats</CardTitle>
-                <CardDescription>What makes cats unique?</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid grid-cols-2 gap-4">
-                  {[
-                    { icon: Paw, text: "Independent nature" },
-                    { icon: Fish, text: "Excellent hunters" },
-                    { icon: Moon, text: "Nocturnal tendencies" },
-                    { icon: Info, text: "Flexible bodies" },
-                    { icon: Info, text: "Quick reflexes" },
-                    { icon: Info, text: "Keen senses" },
-                  ].map((item, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Badge variant="outline" className="p-2 text-sm w-full">
-                        <item.icon className="mr-2 h-4 w-4" /> {item.text}
-                      </Badge>
-                    </motion.li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="breeds">
-            <Card>
-              <CardHeader>
-                <CardTitle>Popular Cat Breeds</CardTitle>
-                <CardDescription>Some well-known cat breeds around the world</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid grid-cols-3 gap-4">
-                  {["Siamese", "Persian", "Maine Coon", "Bengal", "Scottish Fold", "Sphynx"].map((breed, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Badge className="p-2 w-full">
-                        <Heart className="mr-2 h-4 w-4" /> {breed}
-                      </Badge>
-                    </motion.li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="behavior">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cat Behavior</CardTitle>
-                <CardDescription>Understanding feline body language</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {[
-                    "Purring: Often a sign of contentment",
-                    "Tail position: Indicates mood",
-                    "Kneading: A comforting behavior",
-                    "Ear position: Shows alertness or aggression",
-                    "Slow blinking: A sign of trust and affection",
-                  ].map((behavior, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center"
-                    >
-                      <Cat className="mr-2 h-4 w-4 text-purple-600" />
-                      {behavior}
-                    </motion.li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Tabs defaultValue="characteristics" className="mb-12">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsTrigger value="characteristics" className="text-lg">Characteristics</TabsTrigger>
+              <TabsTrigger value="breeds" className="text-lg">Popular Breeds</TabsTrigger>
+              <TabsTrigger value="behavior" className="text-lg">Behavior</TabsTrigger>
+            </TabsList>
+            <TabsContent value="characteristics">
+              <Card className="border-2 border-purple-300">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-purple-700">Characteristics of Cats</CardTitle>
+                  <CardDescription className="text-lg">What makes cats truly unique?</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid grid-cols-2 gap-6">
+                    {[
+                      { icon: Paw, text: "Independent nature", description: "Cats are known for their self-reliance" },
+                      { icon: Fish, text: "Excellent hunters", description: "Natural predators with keen instincts" },
+                      { icon: Moon, text: "Nocturnal tendencies", description: "Most active during twilight hours" },
+                      { icon: Info, text: "Flexible bodies", description: "Can squeeze through small spaces" },
+                      { icon: Info, text: "Quick reflexes", description: "Lightning-fast responses to stimuli" },
+                      { icon: Info, text: "Keen senses", description: "Exceptional hearing and night vision" },
+                    ].map((item, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="outline" className="p-3 text-base w-full hover:bg-purple-100 transition-colors cursor-help">
+                                <item.icon className="mr-2 h-5 w-5 text-purple-600" /> {item.text}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{item.description}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="breeds">
+              <Card className="border-2 border-purple-300">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-purple-700">Popular Cat Breeds</CardTitle>
+                  <CardDescription className="text-lg">Discover well-known cat breeds from around the world</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid grid-cols-3 gap-6">
+                    {[
+                      { name: "Siamese", origin: "Thailand", trait: "Vocal and social" },
+                      { name: "Persian", origin: "Iran", trait: "Long-haired and calm" },
+                      { name: "Maine Coon", origin: "United States", trait: "Large and friendly" },
+                      { name: "Bengal", origin: "United States", trait: "Spotted coat and active" },
+                      { name: "Scottish Fold", origin: "Scotland", trait: "Folded ears and sweet" },
+                      { name: "Sphynx", origin: "Canada", trait: "Hairless and affectionate" },
+                    ].map((breed, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge className="p-3 text-base w-full hover:bg-pink-100 transition-colors cursor-help">
+                                <Heart className="mr-2 h-5 w-5 text-pink-500" /> {breed.name}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p><strong>Origin:</strong> {breed.origin}</p>
+                              <p><strong>Trait:</strong> {breed.trait}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="behavior">
+              <Card className="border-2 border-purple-300">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-purple-700">Cat Behavior</CardTitle>
+                  <CardDescription className="text-lg">Decoding feline body language and communication</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-4">
+                    {[
+                      { behavior: "Purring", description: "Often a sign of contentment, but can also indicate stress or pain" },
+                      { behavior: "Tail position", description: "Upright tail means friendly, puffed tail means scared or angry" },
+                      { behavior: "Kneading", description: "A comforting behavior reminiscent of kittenhood" },
+                      { behavior: "Ear position", description: "Forward ears show interest, flattened ears indicate fear or aggression" },
+                      { behavior: "Slow blinking", description: "A sign of trust and affection, often called a 'cat kiss'" },
+                    ].map((item, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex items-start p-3 bg-blue-50 rounded-lg"
+                      >
+                        <Cat className="mr-3 h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <strong className="text-lg text-blue-700">{item.behavior}:</strong>
+                          <p className="text-blue-600">{item.description}</p>
+                        </div>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
 
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle>Fascinating Feline Facts</CardTitle>
-            <CardDescription>Discover interesting tidbits about our feline friends!</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center relative">
-            <AnimatePresence mode="wait">
-              {showFact && (
-                <motion.div
-                  key={currentFactIndex}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="mb-6"
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <Card className="overflow-hidden border-2 border-purple-300">
+            <CardHeader>
+              <CardTitle className="text-2xl text-purple-700">Fascinating Feline Facts</CardTitle>
+              <CardDescription className="text-lg">Uncover intriguing tidbits about our purr-fect companions!</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center relative p-6">
+              <AnimatePresence mode="wait">
+                {showFact && (
+                  <motion.div
+                    key={currentFactIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="mb-8"
+                  >
+                    <p className="text-2xl font-medium text-purple-700">{catFacts[currentFactIndex]}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <Progress value={progress} className="w-full mb-6 h-2" />
+              <div className="flex justify-center space-x-4">
+                <Button onClick={nextFact} className="bg-purple-600 hover:bg-purple-700 text-lg px-6 py-3">
+                  Next Fact
+                </Button>
+                <Button 
+                  onClick={() => toggleLikeFact(currentFactIndex)} 
+                  variant="outline"
+                  className={`text-lg px-6 py-3 ${likedFacts.includes(currentFactIndex) ? 'bg-pink-100 text-pink-700' : ''}`}
                 >
-                  <p className="text-xl font-medium text-purple-700">{catFacts[currentFactIndex]}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Progress value={progress} className="w-full mb-4" />
-            <Button onClick={nextFact} className="bg-purple-600 hover:bg-purple-700">
-              Next Fact
-            </Button>
-          </CardContent>
-        </Card>
+                  <Star className={`mr-2 h-5 w-5 ${likedFacts.includes(currentFactIndex) ? 'fill-pink-500' : ''}`} />
+                  {likedFacts.includes(currentFactIndex) ? 'Liked!' : 'Like'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

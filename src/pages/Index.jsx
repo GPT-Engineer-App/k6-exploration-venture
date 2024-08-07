@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Cat, Heart, Info, ChevronLeft, ChevronRight } from "lucide-react";
+import { Cat, Heart, Info, Paw, Fish, Moon } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Progress } from "@/components/ui/progress";
 
 const catFacts = [
   "Cats sleep for about 70% of their lives.",
@@ -28,31 +29,50 @@ const catImages = [
 const Index = () => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [showFact, setShowFact] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   const nextFact = () => {
     setShowFact(false);
     setTimeout(() => {
       setCurrentFactIndex((prevIndex) => (prevIndex + 1) % catFacts.length);
       setShowFact(true);
+      setProgress(0);
     }, 300);
   };
 
   useEffect(() => {
-    const interval = setInterval(nextFact, 10000); // Change fact every 10 seconds
+    const interval = setInterval(() => {
+      setProgress((prevProgress) => {
+        if (prevProgress >= 100) {
+          nextFact();
+          return 0;
+        }
+        return prevProgress + 1;
+      });
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-b from-purple-100 to-pink-100">
       <div className="max-w-4xl mx-auto">
-        <motion.h1 
-          className="text-6xl font-bold mb-8 text-center text-purple-800"
+        <motion.div 
+          className="text-center mb-8"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Feline Fascination <Cat className="inline-block ml-2" />
-        </motion.h1>
+          <h1 className="text-6xl font-bold text-purple-800 inline-flex items-center">
+            Feline Fascination 
+            <motion.span
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <Cat className="ml-2 h-12 w-12" />
+            </motion.span>
+          </h1>
+          <p className="text-xl mt-2 text-purple-600">Explore the Wonderful World of Cats</p>
+        </motion.div>
         
         <Carousel className="mb-8">
           <CarouselContent>
@@ -77,9 +97,10 @@ const Index = () => {
         </Carousel>
 
         <Tabs defaultValue="characteristics" className="mb-8">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="characteristics">Characteristics</TabsTrigger>
             <TabsTrigger value="breeds">Popular Breeds</TabsTrigger>
+            <TabsTrigger value="behavior">Behavior</TabsTrigger>
           </TabsList>
           <TabsContent value="characteristics">
             <Card>
@@ -89,12 +110,25 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-2 gap-4">
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Independent nature</Badge></li>
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Excellent hunters</Badge></li>
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Flexible bodies</Badge></li>
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Quick reflexes</Badge></li>
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Keen senses</Badge></li>
-                  <li><Badge variant="outline" className="p-2 text-sm"><Info className="mr-2 h-4 w-4" /> Complex communication</Badge></li>
+                  {[
+                    { icon: Paw, text: "Independent nature" },
+                    { icon: Fish, text: "Excellent hunters" },
+                    { icon: Moon, text: "Nocturnal tendencies" },
+                    { icon: Info, text: "Flexible bodies" },
+                    { icon: Info, text: "Quick reflexes" },
+                    { icon: Info, text: "Keen senses" },
+                  ].map((item, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Badge variant="outline" className="p-2 text-sm w-full">
+                        <item.icon className="mr-2 h-4 w-4" /> {item.text}
+                      </Badge>
+                    </motion.li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
@@ -107,38 +141,75 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-3 gap-4">
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Siamese</Badge></li>
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Persian</Badge></li>
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Maine Coon</Badge></li>
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Bengal</Badge></li>
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Scottish Fold</Badge></li>
-                  <li><Badge className="p-2"><Heart className="mr-2 h-4 w-4" /> Sphynx</Badge></li>
+                  {["Siamese", "Persian", "Maine Coon", "Bengal", "Scottish Fold", "Sphynx"].map((breed, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Badge className="p-2 w-full">
+                        <Heart className="mr-2 h-4 w-4" /> {breed}
+                      </Badge>
+                    </motion.li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="behavior">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cat Behavior</CardTitle>
+                <CardDescription>Understanding feline body language</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {[
+                    "Purring: Often a sign of contentment",
+                    "Tail position: Indicates mood",
+                    "Kneading: A comforting behavior",
+                    "Ear position: Shows alertness or aggression",
+                    "Slow blinking: A sign of trust and affection",
+                  ].map((behavior, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center"
+                    >
+                      <Cat className="mr-2 h-4 w-4 text-purple-600" />
+                      {behavior}
+                    </motion.li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Fascinating Feline Facts</CardTitle>
             <CardDescription>Discover interesting tidbits about our feline friends!</CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
+          <CardContent className="text-center relative">
             <AnimatePresence mode="wait">
               {showFact && (
-                <motion.p
+                <motion.div
                   key={currentFactIndex}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="text-xl mb-6 font-medium text-purple-700"
+                  className="mb-6"
                 >
-                  {catFacts[currentFactIndex]}
-                </motion.p>
+                  <p className="text-xl font-medium text-purple-700">{catFacts[currentFactIndex]}</p>
+                </motion.div>
               )}
             </AnimatePresence>
+            <Progress value={progress} className="w-full mb-4" />
             <Button onClick={nextFact} className="bg-purple-600 hover:bg-purple-700">
               Next Fact
             </Button>

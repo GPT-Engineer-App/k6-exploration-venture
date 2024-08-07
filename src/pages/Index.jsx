@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Cat, Heart, Info, Paw, Fish, Moon, Star } from "lucide-react";
+import { Cat, Heart, Info, Paw, Fish, Moon, Star, ChevronDown } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const catFacts = [
   "Cats sleep for about 70% of their lives.",
@@ -34,6 +35,16 @@ const Index = () => {
   const [progress, setProgress] = useState(0);
   const [likedFacts, setLikedFacts] = useState([]);
   const { toast } = useToast();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const contentRef = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: contentRef,
+    offset: ["start start", "end start"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
 
   const nextFact = () => {
     setShowFact(false);
@@ -69,35 +80,94 @@ const Index = () => {
         return prevProgress + 1;
       });
     }, 100);
-    return () => clearInterval(interval);
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100">
+      <motion.div 
+        className="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-80 backdrop-blur-md shadow-md transition-all duration-300"
+        initial={{ y: -100 }}
+        animate={{ y: isScrolled ? 0 : -100 }}
+      >
+        <div className="max-w-5xl mx-auto py-4 px-8 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-purple-800 flex items-center">
+            <Cat className="mr-2 h-6 w-6 text-pink-500" />
+            Feline Fascination
+          </h2>
+          <nav>
+            <ul className="flex space-x-6">
+              <li><a href="#gallery" className="text-purple-600 hover:text-purple-800">Gallery</a></li>
+              <li><a href="#facts" className="text-purple-600 hover:text-purple-800">Facts</a></li>
+              <li><a href="#breeds" className="text-purple-600 hover:text-purple-800">Breeds</a></li>
+            </ul>
+          </nav>
+        </div>
+      </motion.div>
+
+      <div className="max-w-5xl mx-auto px-8 pt-24">
         <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="text-center mb-12 h-screen flex flex-col justify-center items-center"
+          style={{ opacity, scale }}
+          ref={contentRef}
         >
-          <h1 className="text-7xl font-bold text-purple-800 inline-flex items-center">
+          <motion.h1 
+            className="text-8xl font-bold text-purple-800 inline-flex items-center mb-8"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Feline Fascination 
             <motion.span
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              <Cat className="ml-4 h-16 w-16 text-pink-500" />
+              <Cat className="ml-4 h-24 w-24 text-pink-500" />
             </motion.span>
-          </h1>
-          <p className="text-2xl mt-4 text-purple-600 font-light">Embark on a Whimsical Journey Through the World of Cats</p>
+          </motion.h1>
+          <motion.p 
+            className="text-3xl mt-4 text-purple-600 font-light max-w-2xl"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            Embark on a Whimsical Journey Through the Enchanting World of Cats
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-12"
+          >
+            <Button 
+              size="lg" 
+              className="bg-purple-600 hover:bg-purple-700 text-xl px-8 py-4"
+              onClick={() => document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' })}
+            >
+              Start Exploring
+              <ChevronDown className="ml-2 h-5 w-5" />
+            </Button>
+          </motion.div>
         </motion.div>
         
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          id="gallery"
+          className="mb-24"
         >
+          <h2 className="text-4xl font-bold text-purple-800 mb-8 text-center">Feline Gallery</h2>
           <Carousel className="mb-12">
             <CarouselContent>
               {catImages.map((src, index) => (
@@ -111,7 +181,7 @@ const Index = () => {
                     <img 
                       src={src}
                       alt={`Cat ${index + 1}`}
-                      className="mx-auto object-cover w-full h-[500px] rounded-xl shadow-2xl"
+                      className="mx-auto object-cover w-full h-[600px] rounded-xl shadow-2xl"
                     />
                   </motion.div>
                 </CarouselItem>
@@ -254,10 +324,13 @@ const Index = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
+          id="facts"
+          className="mb-24"
         >
+          <h2 className="text-4xl font-bold text-purple-800 mb-8 text-center">Fascinating Feline Facts</h2>
           <Card className="overflow-hidden border-2 border-purple-300">
             <CardHeader>
-              <CardTitle className="text-2xl text-purple-700">Fascinating Feline Facts</CardTitle>
+              <CardTitle className="text-2xl text-purple-700">Did You Know?</CardTitle>
               <CardDescription className="text-lg">Uncover intriguing tidbits about our purr-fect companions!</CardDescription>
             </CardHeader>
             <CardContent className="text-center relative p-6">
@@ -271,7 +344,7 @@ const Index = () => {
                     transition={{ duration: 0.3 }}
                     className="mb-8"
                   >
-                    <p className="text-2xl font-medium text-purple-700">{catFacts[currentFactIndex]}</p>
+                    <p className="text-3xl font-medium text-purple-700">{catFacts[currentFactIndex]}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -291,6 +364,43 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          id="breeds"
+          className="mb-24"
+        >
+          <h2 className="text-4xl font-bold text-purple-800 mb-8 text-center">Popular Cat Breeds</h2>
+          <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { name: "Siamese", origin: "Thailand", trait: "Vocal and social", image: "https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg" },
+                { name: "Persian", origin: "Iran", trait: "Long-haired and calm", image: "https://upload.wikimedia.org/wikipedia/commons/1/15/White_Persian_Cat.jpg" },
+                { name: "Maine Coon", origin: "United States", trait: "Large and friendly", image: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Maine_Coon_cat_by_Tomitheos.JPG" },
+                { name: "Bengal", origin: "United States", trait: "Spotted coat and active", image: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Paintedcats_Red_Star_standing.jpg" },
+                { name: "Scottish Fold", origin: "Scotland", trait: "Folded ears and sweet", image: "https://upload.wikimedia.org/wikipedia/commons/5/5d/Adult_Scottish_Fold.jpg" },
+                { name: "Sphynx", origin: "Canada", trait: "Hairless and affectionate", image: "https://upload.wikimedia.org/wikipedia/commons/e/e8/Sphinx2_July_2006.jpg" },
+              ].map((breed, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+                >
+                  <img src={breed.image} alt={breed.name} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h3 className="text-xl font-semibold text-purple-700">{breed.name}</h3>
+                    <p className="text-gray-600"><strong>Origin:</strong> {breed.origin}</p>
+                    <p className="text-gray-600"><strong>Trait:</strong> {breed.trait}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </ScrollArea>
         </motion.div>
       </div>
     </div>
